@@ -141,7 +141,11 @@ elif page == "실시간 탐지":
     key="realtime",
     video_frame_callback=process_frame,
     mode=WebRtcMode.SENDRECV,
-    media_stream_constraints={"video": True, "audio": False},
+    media_stream_constraints={"video": {
+            "width": {"min": 480, "ideal": 720, "max": 1080},
+            "height": {"min": 800, "ideal": 1280, "max": 1920}
+        },
+                              "audio": False},
     async_processing=True,
     rtc_configuration={
         "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
