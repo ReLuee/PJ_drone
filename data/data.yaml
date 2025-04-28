@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['p3rson']
+
+roboflow:
+  workspace: ruu
+  project: object-detection-from-drone-avxil
+  version: 3
+  license: Private
+  url: https://universe.roboflow.com/ruu/object-detection-from-drone-avxil/dataset/3
