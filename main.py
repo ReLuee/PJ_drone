@@ -12,7 +12,7 @@ import numpy as np
 os.environ["STREAMLIT_WATCH_FILE"] = "false"
 
 # YOLO 모델 로드
-model = YOLO(r".\runs\train\rps_yolov115\weights\best.pt")  # 사전 학습된 모델을 사용
+model = YOLO(r"runs\train\rps_yolov115\weights\best.pt")  # 사전 학습된 모델을 사용
 # model.names[0]="person"
 
 # 페이지 설정
