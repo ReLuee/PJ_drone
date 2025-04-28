@@ -1,0 +1,10 @@
+streamlit==1.44.1
+streamlit-webrtc==0.62.4
+ultralytics==8.3.107
+ultralytics-thop==2.0.14
+numpy==1.26.4
+onnx==1.17.0
+onnxruntime-gpu==1.21.0
+onnxslim==0.1.50
+opencv-python==4.11.0.86
+scikit-learn==1.6.1
