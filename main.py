@@ -66,8 +66,6 @@ def detect_and_draw(image):
     class_ids = boxes.cls.tolist()
     confidences = boxes.conf.tolist()
     xyxy = boxes.xyxy.tolist()
-    class_names = result.names
-    labels = [class_names[int(i)] for i in class_ids]
 
     for i, box in enumerate(xyxy):
         if int(class_ids[i]) == 0:  # 0번 클래스: 사람
@@ -80,7 +78,7 @@ def detect_and_draw(image):
 # 추가//실시간 탐지
 def process_frame(frame):
     img = frame.to_ndarray(format="bgr24")
-    results = model(img)
+    results = detect_and_draw(img)
     annotated_img = results[0].plot()
     return av.VideoFrame.from_ndarray(annotated_img, format="bgr24")
 
