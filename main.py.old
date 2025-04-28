@@ -92,24 +92,28 @@ if page == "사진 갤러리":
 elif page == "동영상 갤러리":
     st.title("🎞️ 동영상 갤러리")
     uploaded_video = st.file_uploader("📤 동영상을 업로드하세요", type=["mp4", "mov", "avi", "mkv"])
-    frame_placeholder = st.empty()
 
     if uploaded_video is not None:
-        tfile = tempfile.NamedTemporaryFile(delete=False)
+        tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
         tfile.write(uploaded_video.read())
 
         # 동영상 캡처
         cap = cv2.VideoCapture(tfile.name)
+        stframe = st.empty()  # 실시간 프레임 표시용 placeholder
+
+        frame_interval = 1 # 프레임 간격 줄이기 (더 빠르게 보여줌)
+        frame_count = 0
 
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
-            
-            results = model(frame)
-            annotated_frame = results[0].plot()
-            frame_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
-            frame_placeholder.image(frame_rgb, channels="RGB")            
+
+            if frame_count % frame_interval == 0:
+                processed = detect_and_draw(frame)
+                stframe.image(cv2.cvtColor(processed, cv2.COLOR_BGR2RGB), channels="RGB", use_container_width=True)
+
+            frame_count += 1
 
         cap.release()
 
