@@ -1,3 +1,4 @@
+av==14.3.0
 streamlit==1.44.1
 streamlit-webrtc==0.62.4
 opencv-python==4.11.0.86

@@ -2,12 +2,13 @@ import os
 import base64
 import datetime
 import streamlit as st
-from streamlit_webrtc import webrtc_streamer
+from streamlit_webrtc import webrtc_streamer, WebRtcMode
 from ultralytics import YOLO
 import cv2
 import tempfile
 from PIL import Image
 import numpy as np
+import av
 
 os.environ["STREAMLIT_WATCH_FILE"] = "false"
 
@@ -76,6 +77,13 @@ def detect_and_draw(image):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
     return image
 
+# 추가//실시간 탐지
+def process_frame(frame):
+    img = frame.to_ndarray(format="bgr24")
+    results = model(img)
+    annotated_img = results[0].plot()
+    return av.VideoFrame.from_ndarray(annotated_img, format="bgr24")
+
 # 사진 갤러리 처리
 if page == "사진 갤러리":
     st.title("📷 사진 갤러리")
@@ -106,7 +114,7 @@ elif page == "동영상 갤러리":
             if not ret:
                 break
             
-            results = model(frame)
+            results = detect_and_draw(frame)
             annotated_frame = results[0].plot()
             frame_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
             frame_placeholder.image(frame_rgb, channels="RGB")            
@@ -131,20 +139,13 @@ elif page == "문의하기":
 elif page == "실시간 탐지":
     st.title("실시간 촬영 및 탐지")
     
-    
-    if st.button("탐지 시작"):
-        cap = cv2.VideoCapture(0)
-        if st.button("탐지 종료"):
-            cap.release()
-            
-        stframe = st.empty()
-        
-        
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if not ret:
-                break
-            
-            processed = detect_and_draw(frame)
-            stframe.image(cv2.cvtColor(processed, cv2.COLOR_BGR2RGB), channels="RGB", use_container_width=True)
-                    
+    webrtc_streamer(
+    key="realtime",
+    video_frame_callback=process_frame,
+    mode=WebRtcMode.SENDRECV,
+    media_stream_constraints={"video": True, "audio": False},
+    async_processing=True,
+    rtc_configuration={
+        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+    }
+)
