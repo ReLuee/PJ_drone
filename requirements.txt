@@ -9,3 +9,8 @@ onnx==1.17.0
 onnxruntime-gpu==1.21.0
 onnxslim==0.1.50
 scikit-learn==1.6.1
+torch==2.6.0+cu124
+torchaudio==2.6.0+cu124
+torchmetrics==1.7.1
+torchsummary==1.5.1
+torchvision==0.21.0+cu124

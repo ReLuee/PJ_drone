@@ -9,6 +9,10 @@ import tempfile
 from PIL import Image
 import numpy as np
 import av
+import torch
+
+if not hasattr(torch.classes, "__path__"):
+    torch.classes.__path__ = []
 
 os.environ["STREAMLIT_WATCH_FILE"] = "false"
 
