@@ -169,16 +169,21 @@ elif page == "동영상 갤러리":
             progress_bar.progress(percent_complete, text=f"동영상 처리 중... ({percent_complete}%)")
             frame_idx += 1
 
-            # 화면 갱신을 위한 sleep
             time.sleep(0.001)
 
         cap.release()
         out.release()
         progress_bar.empty()
-        convert_to_h264(out_file.name, "converted_h264.mp4")
+
+        # 변환 파일도 임시 파일로 생성
+        converted_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
+        convert_to_h264(out_file.name, converted_file.name)
 
         st.success("탐지가 완료되었습니다! 아래에서 결과 영상을 확인하세요.")
-        st.video("converted_h264.mp4")
+
+        # 변환된 파일을 바이너리로 읽어서 넘김
+        with open(converted_file.name, "rb") as video_file:
+            st.video(video_file.read())
 
 # 기타 페이지
 elif page == "홈":
