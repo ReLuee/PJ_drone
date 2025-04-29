@@ -19,7 +19,6 @@ os.environ["STREAMLIT_WATCH_FILE"] = "false"
 
 # YOLO 모델 로드
 model = YOLO("./runs/train/rps_yolov115/weights/best.pt")  # 사전 학습된 모델을 사용
-# model = YOLO(r"C:\workspace\7_딥러닝\PJ_drone_save_human\runs\train\rps_yolov115\weights\best.pt")  # 사전 학습된 모델을 사용
 
 # 페이지 설정
 st.set_page_config(page_title="드론으로 생명을 살리는 감지 시스템",  layout="wide") #page_icon="data/Brone.png",
@@ -48,7 +47,6 @@ def set_background(image_path):
 # 사이드바 메뉴
 with st.sidebar:
     st.sidebar.image("./image/MeaMi.png")
-    # st.sidebar.image(r"C:\workspace\7_딥러닝\PJ_drone_save_human\image\MeaMi.png")
     # st.image("data/logo.png", width=120)
     st.title("분석 모델 선택")
     page = st.selectbox("이동할 섹션을 선택하세요:", ["홈", "소개", "실시간 영상","이미지 분석", "영상 분석", "문의하기"], key="sidebar_select")
@@ -266,7 +264,6 @@ elif page == "홈":
 
     # 이미지 중앙 정렬
     with open("./image/딥러닝프로젝트.png", "rb") as img_file:
-    # with open(r"C:\workspace\7_딥러닝\PJ_drone_save_human\image\딥러닝프로젝트.png", "rb") as img_file:
         img_bytes = img_file.read()
         encoded = base64.b64encode(img_bytes).decode()
 
