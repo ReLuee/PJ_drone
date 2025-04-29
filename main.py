@@ -18,11 +18,11 @@ torch.classes.__path__ = [os.path.join(torch.__path__[0], "classes")]
 os.environ["STREAMLIT_WATCH_FILE"] = "false"
 
 # YOLO 모델 로드
-model = YOLO("./runs/train/rps_yolov115/weights/best.pt")  # 사전 학습된 모델을 사용
-# model.names[0]="person"
+# model = YOLO("./runs/train/rps_yolov115/weights/best.pt")  # 사전 학습된 모델을 사용
+model = YOLO(r"C:\workspace\7_딥러닝\PJ_drone_save_human\runs\train\rps_yolov115\weights\best.pt")  # 사전 학습된 모델을 사용
 
 # 페이지 설정
-st.set_page_config(page_title="드론으로 생명을 살리는 감지 시스템", page_icon="", layout="wide")
+st.set_page_config(page_title="드론으로 생명을 살리는 감지 시스템",  layout="wide") #page_icon="data/Brone.png",
 
 # 배경 설정 함수
 def set_background(image_path):
@@ -47,9 +47,23 @@ def set_background(image_path):
 
 # 사이드바 메뉴
 with st.sidebar:
+    # st.sidebar.image("./image/MeaMi.png")
+    st.sidebar.image(r"C:\workspace\7_딥러닝\PJ_drone_save_human\image\MeaMi.png")
     # st.image("data/logo.png", width=120)
-    st.title("📑 드론 감지 시스템 목차")
-    page = st.selectbox("이동할 섹션을 선택하세요:", ["홈", "소개", "사진 갤러리", "동영상 갤러리", "실시간 탐지", "문의하기"], key="sidebar_select")
+    st.title("분석 모델 선택")
+    page = st.selectbox("이동할 섹션을 선택하세요:", ["홈", "소개", "실시간 영상","이미지 분석", "영상 분석", "문의하기"], key="sidebar_select")
+    st.sidebar.markdown(""" 
+        8조
+        - 손영석
+        - 이종현
+        - 배성우
+        - 박범기
+
+        ---
+        - 사용모델: YOLOv11 (.pt)
+        - 데이터 수집처: roboflow
+        - 웹 제작: streamlit
+    """)
 
 # 새로고침 시 홈으로
 if 'page' not in st.session_state:
@@ -101,8 +115,8 @@ def convert_to_h264(input_path, output_path):
     subprocess.run(command, check=True)
 
 # 사진 갤러리 처리
-if page == "사진 갤러리":
-    st.title("📷 사진 갤러리")
+if page == "이미지 분석":
+    st.title("📷 이미지 분석")
     uploaded_image = st.file_uploader("📤 이미지를 업로드하세요", type=["jpg", "jpeg", "png"])
 
     if uploaded_image is not None:
@@ -112,11 +126,10 @@ if page == "사진 갤러리":
         processed_img = detect_and_draw(open_cv_image)
         st.image(cv2.cvtColor(processed_img, cv2.COLOR_BGR2RGB), use_container_width=True)
 
-        
 # 동영상 갤러리 처리
-elif page == "동영상 갤러리":
-    st.title("🎞️ 동영상 갤러리")
-    uploaded_video = st.file_uploader("📤 동영상을 업로드하세요", type=["mp4", "mov", "avi", "mkv"])
+elif page == "영상 분석":
+    st.title("🎞️ 영상 분석")
+    uploaded_video = st.file_uploader("📤 영상을 업로드하세요", type=["mp4", "mov", "avi", "mkv"])
 
     # if uploaded_video is not None:
     #     tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
@@ -131,6 +144,7 @@ elif page == "동영상 갤러리":
 
     #     while cap.isOpened():
     #         ret, frame = cap.read()
+    #         # frame = cv2.resize(frame,(640,480))
     #         if not ret:
     #             break
 
@@ -141,7 +155,7 @@ elif page == "동영상 갤러리":
     #         frame_count += 1
 
     #     cap.release()
-
+    
     if uploaded_video is not None:
         tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
         tfile.write(uploaded_video.read())
@@ -190,32 +204,77 @@ elif page == "동영상 갤러리":
         # 변환된 파일을 바이너리로 읽어서 넘김
         with open(converted_file.name, "rb") as video_file:
             st.video(video_file.read())
+            
+
+elif page == "실시간 영상":
+    st.title("실시간 카메라 연동")
+    st.write("웹캠과 연동하여 실시간으로 영상을 가져옵니다.")
+
+    # cap = cv2.VideoCapture(0)  # 0번 카메라 (기본 내장 캠)
+    # cap.set(cv2.CAP_PROP_FRAME_WIDTH,4080)
+    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT,2040)
+    # stframe = st.empty()
+
+    # while True:
+    #     ret,frame = cap.read()
+    #     if not ret:
+    #         st.warning("카메라가 없쪙")
+    #         break
+    #     frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+    #     frame = cv2.resize(frame, (0, 0), fx=0.3, fy=0.3, interpolation=cv2.INTER_AREA)
+       
+    #     # stframe.image(frame,channels="RGB")
+    #     processed_frame = detect_and_draw(frame)
+
+    #     stframe.image(processed_frame, channels="RGB",width=1000)
+
+    #     # 살짝 sleep을 줘서 너무 과부하 방지
+    #     time.sleep(0.02)
+
+    #     if cv2.waitKey(1) == ord("q"):
+    #         break
+    # cap.release()
+    
+    webrtc_streamer(
+        key="realtime",
+        video_frame_callback=process_frame,
+        mode=WebRtcMode.SENDRECV,
+        media_stream_constraints={"video": True, "audio": False},
+        async_processing=True,
+        rtc_configuration={
+            "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+        }
+    )
 
 # 기타 페이지
 elif page == "홈":
-    st.title("🚀 드론을 활용한 생존자 유무 체크")
-    st.write("이 시스템은 생존자 탐색을 위해 드론 데이터를 수집하고, 분석하여 시각화합니다.")
+    st.markdown(
+        """
+        <h2 style='text-align: center;'>🚀 드론을 활용한 실종자 수색 시스템</h2>
+        """,
+        unsafe_allow_html=True
+    )
 
-elif page == "소개":
-    st.title("📘 소개")
-    st.write("메타버스아카데미 대구 AI반 8팀 3차 프로젝트인 **폭격기**에서 개발한 드론 탐지 시스템입니다.")
+    st.markdown(
+        """
+        <p style='text-align: center; font-size:18px;'>
+        이 시스템은 드론이 촬영한 영상에서 사람으로 추정되는 물체를 포착합니다.
+        </p>
+        """,
+        unsafe_allow_html=True
+    )
 
-elif page == "문의하기":
-    st.title("📞 여기는 왜 눌러보셨나요. 문의할게 어딨다고? 문의할 내용 여기에.")
-    st.write("이메일: BOOM@EXPLOSION.com")
+    # 이미지 중앙 정렬
+    # with open("./image/딥러닝프로젝트.png", "rb") as img_file:
+    with open(r"C:\workspace\7_딥러닝\PJ_drone_save_human\image\딥러닝프로젝트.png", "rb") as img_file:
+        img_bytes = img_file.read()
+        encoded = base64.b64encode(img_bytes).decode()
 
-
-# 추가//실시간 탐지
-elif page == "실시간 탐지":
-    st.title("실시간 촬영 및 탐지")
-    
-    webrtc_streamer(
-    key="realtime",
-    video_frame_callback=process_frame,
-    mode=WebRtcMode.SENDRECV,
-    media_stream_constraints={"video": True, "audio": False},
-    async_processing=True,
-    rtc_configuration={
-        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
-    }
-)
+    st.markdown(
+        f"""
+        <div style="text-align: center;">
+            <img src="data:image/png;base64,{encoded}" width="660">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
