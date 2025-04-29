@@ -12,6 +12,7 @@ import av
 import torch
 import tempfile
 import time
+import subprocess
 
 torch.classes.__path__ = [os.path.join(torch.__path__[0], "classes")]
 os.environ["STREAMLIT_WATCH_FILE"] = "false"
@@ -85,6 +86,14 @@ def process_frame(frame):
     result = detect_and_draw(img)
     return av.VideoFrame.from_ndarray(result, format="bgr24")
 
+# 동영상 코덱 문제 처리 함수
+def convert_to_h264(input_path, output_path):
+    command = [
+        "ffmpeg", "-y", "-i", input_path,
+        "-vcodec", "libx264", "-acodec", "aac", output_path
+    ]
+    subprocess.run(command, check=True)
+
 # 사진 갤러리 처리
 if page == "사진 갤러리":
     st.title("📷 사진 갤러리")
@@ -138,12 +147,11 @@ elif page == "동영상 갤러리":
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        # 코덱을 여러 가지로 시도해보세요.
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # 또는 'XVID', 'avc1'
         out_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(out_file.name, fourcc, fps, (width, height))
 
-        progress_bar = st.progress(0, text="동영상 처리 중입니다. 잠시만 기다려 주세요.")
+        progress_bar = st.progress(0, text="탐지 중입니다. 잠시만 기다려 주세요.")
 
         frame_idx = 0
         while cap.isOpened():
@@ -151,11 +159,6 @@ elif page == "동영상 갤러리":
             if not ret:
                 break
 
-            # 프레임 shape이 (height, width, 3)인지 확인
-            if frame is None or len(frame.shape) != 3 or frame.shape[2] != 3:
-                continue
-
-            # 프레임 크기 일치
             if frame.shape[1] != width or frame.shape[0] != height:
                 frame = cv2.resize(frame, (width, height))
 
@@ -166,22 +169,16 @@ elif page == "동영상 갤러리":
             progress_bar.progress(percent_complete, text=f"동영상 처리 중... ({percent_complete}%)")
             frame_idx += 1
 
+            # 화면 갱신을 위한 sleep
             time.sleep(0.001)
 
         cap.release()
         out.release()
         progress_bar.empty()
+        convert_to_h264(out_file.name, "converted_h264.mp4")
 
-        # 파일 경로 출력 (디버깅용)
-        st.write("저장된 파일 경로:", out_file.name)
-        st.write("파일 크기:", os.path.getsize(out_file.name), "bytes")
-
-        # 파일이 실제로 존재하고 크기가 0보다 큰지 확인
-        if os.path.exists(out_file.name) and os.path.getsize(out_file.name) > 0:
-            st.success("탐지가 완료되었습니다! 아래에서 결과 영상을 확인하세요.")
-            st.video(out_file.name)
-        else:
-            st.error("결과 영상 파일이 생성되지 않았습니다. 코덱/프레임 설정을 확인하세요.")
+        st.success("탐지가 완료되었습니다! 아래에서 결과 영상을 확인하세요.")
+        st.video("converted_h264.mp4")
 
 # 기타 페이지
 elif page == "홈":
