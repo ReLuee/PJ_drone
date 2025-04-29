@@ -95,59 +95,65 @@ if page == "사진 갤러리":
         processed_img = detect_and_draw(open_cv_image)
         st.image(cv2.cvtColor(processed_img, cv2.COLOR_BGR2RGB), use_container_width=True)
 
-# # 동영상 갤러리 처리
-# elif page == "동영상 갤러리":
-#     st.title("🎞️ 동영상 갤러리")
-#     uploaded_video = st.file_uploader("📤 동영상을 업로드하세요", type=["mp4", "mov", "avi", "mkv"])
-#     frame_placeholder = st.empty()
-
-#     if uploaded_video is not None:
-#         tfile = tempfile.NamedTemporaryFile(delete=False)
-#         tfile.write(uploaded_video.read())
-
-#         # 동영상 캡처
-#         cap = cv2.VideoCapture(tfile.name)
-
-#         while cap.isOpened():
-#             ret, frame = cap.read()
-#             if not ret:
-#                 break
-            
-#             results = detect_and_draw(frame)
-#             annotated_frame = results[0].plot()
-#             frame_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
-#             frame_placeholder.image(frame_rgb, channels="RGB")            
-
-#         cap.release()
         
 # 동영상 갤러리 처리
 elif page == "동영상 갤러리":
     st.title("🎞️ 동영상 갤러리")
     uploaded_video = st.file_uploader("📤 동영상을 업로드하세요", type=["mp4", "mov", "avi", "mkv"])
 
+    # if uploaded_video is not None:
+    #     tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+    #     tfile.write(uploaded_video.read())
+
+    #     # 동영상 캡처
+    #     cap = cv2.VideoCapture(tfile.name)
+    #     stframe = st.empty()  # 실시간 프레임 표시용 placeholder
+
+    #     frame_interval = 1 # 프레임 간격 줄이기 (더 빠르게 보여줌)
+    #     frame_count = 0
+
+    #     while cap.isOpened():
+    #         ret, frame = cap.read()
+    #         if not ret:
+    #             break
+
+    #         if frame_count % frame_interval == 0:
+    #             processed = detect_and_draw(frame)
+    #             stframe.image(cv2.cvtColor(processed, cv2.COLOR_BGR2RGB), channels="RGB", use_container_width=True)
+
+    #         frame_count += 1
+
+    #     cap.release()
+
     if uploaded_video is not None:
-        tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+        # 임시파일로 저장
+        tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
         tfile.write(uploaded_video.read())
 
-        # 동영상 캡처
+        # 동영상 읽기
         cap = cv2.VideoCapture(tfile.name)
-        stframe = st.empty()  # 실시간 프레임 표시용 placeholder
+        # 동영상 정보 얻기
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        frame_interval = 1 # 프레임 간격 줄이기 (더 빠르게 보여줌)
-        frame_count = 0
+        # 결과 동영상 저장용 임시 파일
+        out_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter(out_file.name, fourcc, fps, (width, height))
 
+        # 프레임별로 처리
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
-
-            if frame_count % frame_interval == 0:
-                processed = detect_and_draw(frame)
-                stframe.image(cv2.cvtColor(processed, cv2.COLOR_BGR2RGB), channels="RGB", use_container_width=True)
-
-            frame_count += 1
-
+            processed = detect_and_draw(frame)
+            out.write(processed)
         cap.release()
+        out.release()
+
+        st.success("탐지가 완료되었습니다! 아래에서 결과 영상을 확인하세요.")
+        st.video(out_file.name)
 
 
 # 기타 페이지
