@@ -11,6 +11,7 @@ import numpy as np
 import av
 import torch
 import tempfile
+import time
 
 torch.classes.__path__ = [os.path.join(torch.__path__[0], "classes")]
 os.environ["STREAMLIT_WATCH_FILE"] = "false"
@@ -127,24 +128,20 @@ elif page == "동영상 갤러리":
     #     cap.release()
 
     if uploaded_video is not None:
-        # 임시 파일로 저장
         tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
         tfile.write(uploaded_video.read())
         tfile.close()
 
-        # 동영상 정보 얻기
         cap = cv2.VideoCapture(tfile.name)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         fps = cap.get(cv2.CAP_PROP_FPS)
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-        # 결과 동영상 저장용 임시 파일
         out_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(out_file.name, fourcc, fps, (width, height))
 
-        # 진행률 바
         progress_bar = st.progress(0, text="동영상 처리 중입니다. 잠시만 기다려 주세요.")
 
         frame_idx = 0
@@ -153,7 +150,6 @@ elif page == "동영상 갤러리":
             if not ret:
                 break
 
-            # 프레임 크기 일치 확인
             if frame.shape[1] != width or frame.shape[0] != height:
                 frame = cv2.resize(frame, (width, height))
 
@@ -164,12 +160,14 @@ elif page == "동영상 갤러리":
             progress_bar.progress(percent_complete, text=f"동영상 처리 중... ({percent_complete}%)")
             frame_idx += 1
 
+            # 화면 갱신을 위한 sleep
+            time.sleep(0.001)
+
         cap.release()
         out.release()
         progress_bar.empty()
 
-        # st.video()로 재생
-        st.success("처리가 완료되었습니다! 아래에서 결과 영상을 확인하세요.")
+        st.success("탐지가 완료되었습니다! 아래에서 결과 영상을 확인하세요.")
         st.video(out_file.name)
 
 # 기타 페이지
