@@ -81,10 +81,16 @@ def detect_and_draw(image):
     return image
 
 # 추가//실시간 탐지
+frame_count = 0
 def process_frame(frame):
+    global frame_count
     img = frame.to_ndarray(format="bgr24")
-    result = detect_and_draw(img)
-    return av.VideoFrame.from_ndarray(result, format="bgr24")
+    if frame_count % 5 == 0:
+        result = detect_and_draw(img)
+        process_frame.last_result = result
+    frame_count += 1
+    return av.VideoFrame.from_ndarray(process_frame.last_result, format="bgr24")
+process_frame.last_result = None
 
 # 동영상 코덱 문제 처리 함수
 def convert_to_h264(input_path, output_path):
