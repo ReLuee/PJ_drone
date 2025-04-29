@@ -80,9 +80,8 @@ def detect_and_draw(image):
 # 추가//실시간 탐지
 def process_frame(frame):
     img = frame.to_ndarray(format="bgr24")
-    results = detect_and_draw(img)
-    annotated_img = results[0].plot()
-    return av.VideoFrame.from_ndarray(annotated_img, format="bgr24")
+    result = detect_and_draw(img)
+    return av.VideoFrame.from_ndarray(result, format="bgr24")
 
 # 사진 갤러리 처리
 if page == "사진 갤러리":
