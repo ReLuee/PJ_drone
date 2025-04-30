@@ -1,0 +1,6 @@
+[theme]
+primaryColor="#E3B778"   # 포인트 색깔 (예: 약간 짙은 베이지)
+backgroundColor="#F5F5DC"  # 배경색을 베이지로
+secondaryBackgroundColor="#FFF8DC" # 약간 밝은 베이지
+textColor="#2C2C2C"     # 짙은 회색 텍스트
+font="sans serif"

@@ -14,6 +14,7 @@ import tempfile
 import time
 import subprocess
 
+
 torch.classes.__path__ = [os.path.join(torch.__path__[0], "classes")]
 os.environ["STREAMLIT_WATCH_FILE"] = "false"
 
@@ -72,7 +73,7 @@ if page != st.session_state.page:
     st.rerun()
 
 # 메인 페이지 제목
-st.markdown(f"<h2 style='text-align:center;'>드론 실종자 탐지 시스템</h2>", unsafe_allow_html=True)
+st.markdown(f"<h2 style='text-align:center;'>🚀 드론을 활용한 실종자 수색 시스템</h2>", unsafe_allow_html=True)
 st.markdown(f"<div style='font-size:18px; font-weight:bold;'>📌 현재 페이지: {page}</div>", unsafe_allow_html=True)
 
 
@@ -279,11 +280,11 @@ elif page == "실시간 탐지":
 elif page == "홈":
     st.markdown(
         """
-        <h2 style='text-align: center;'>🚀 드론을 활용한 실종자 수색 시스템</h2>
+        <h2 style='text-align: center;'>8조 딥러닝 프로젝트!</h2>
         """,
+        
         unsafe_allow_html=True
     )
-
     st.markdown(
         """
         <p style='text-align: center; font-size:18px;'>
@@ -293,16 +294,42 @@ elif page == "홈":
         unsafe_allow_html=True
     )
 
-    # 이미지 중앙 정렬
-    with open("./image/딥러닝프로젝트.png", "rb") as img_file:
-        img_bytes = img_file.read()
-        encoded = base64.b64encode(img_bytes).decode()
+    col1,col2 = st.columns(2)
 
-    st.markdown(
-        f"""
-        <div style="text-align: center;">
-            <img src="data:image/png;base64,{encoded}" width="660">
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    
+    with col1:
+    # 이미지 중앙 정렬
+        
+
+        with open("./image/딥러닝프로젝트.png", "rb") as img_file:
+            img_bytes = img_file.read()
+            encoded = base64.b64encode(img_bytes).decode()
+
+        st.markdown(
+            f"""
+            <div style="text-align: center;">
+                <img src="data:image/png;base64,{encoded}" width="660" style="border-radius:100px">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+    with col2:
+        st.markdown(
+            f"""
+                <br>
+                <br>
+                <h2>프로젝트 소개</h2>
+                <h3 style='font-size:18px; color: #2C2C2C;'>
+                    저희 프로젝트는 드론이 촬영한 항공 영상을 딥러닝으로 분석하여,
+                    실종자를 탐지하는 것을 목표로 합니다.<br><br>
+                </h3>
+
+                <h3>스마트폰,웹캠 등에서 실시간 영상을 전송받아 분석<br><br>
+                이미지를 업로드 받아 분석<br><br>
+                이미 녹화된 영상을 업로드 받아 분석<br></h3>        
+            """,
+            unsafe_allow_html=True
+        )
+
+        
