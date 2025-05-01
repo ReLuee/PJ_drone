@@ -78,7 +78,7 @@ st.markdown(f"<div style='font-size:18px; font-weight:bold;'>📌 현재 페이�
 
 
 # 공통 YOLO 탐지 함수 (박스 정보 반환)
-def detect_and_draw(image):
+def detect_and_draw(image, threshold=0.1):  # threshold 파라미터 추가
     results = model(image)
     result = results[0]
     boxes = result.boxes
@@ -88,21 +88,21 @@ def detect_and_draw(image):
 
     detections = []
     for i, box in enumerate(xyxy):
-        if int(class_ids[i]) == 0:  # 0번 클래스: 사람
+        conf = confidences[i]
+        if int(class_ids[i]) == 0 and conf >= threshold:  # threshold 조건 추가
             x1, y1, x2, y2 = map(int, box)
-            conf = confidences[i]
             detections.append((x1, y1, x2, y2, conf))
-            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
             cv2.putText(image, f'person {conf:.2f}', (x1, y1 - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
     return image, detections
 
 # 박스 그리기만 하는 함수
 def draw_boxes(image, detections):
     for x1, y1, x2, y2, conf in detections:
-        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv2.rectangle(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
         cv2.putText(image, f'person {conf:.2f}', (x1, y1 - 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
     return image
 
 
@@ -144,7 +144,7 @@ if page == "이미지 분석":
 # 동영상 갤러리 처리
 elif page == "영상 분석":
     st.title("🎞️ 영상 분석")
-    uploaded_video = st.file_uploader("📤 영상을 업로드하세요", type=["mp4", "mov", "avi", "mkv"])
+    uploaded_video = st.file_uploader("📤 영상을 업로드하세요", type=["mp4", "mov", "avi", "mkv", "webm"])
     
     if uploaded_video is not None:
         tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
@@ -208,7 +208,7 @@ elif page == "영상 분석":
 # 동영상 실시간 분석 후 반환
 elif page == "영상 즉시 분석":
     st.title("🎞️ 영상 즉시 분석(낮은 FPS)")
-    uploaded_video = st.file_uploader("📤 동영상을 업로드하세요", type=["mp4", "mov", "avi", "mkv"])
+    uploaded_video = st.file_uploader("📤 동영상을 업로드하세요", type=["mp4", "mov", "avi", "mkv", "webm"])
 
     if uploaded_video is not None:
         tfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
@@ -225,7 +225,7 @@ elif page == "영상 즉시 분석":
 
         start_time = time.time()
         
-        frame_interval = round(fps*0.4) # 출력 프레임 간격
+        frame_interval = round(fps*0.5) # 출력 프레임 간격
         frame_idx = 0
         last_detections = []  # 마지막 탐지 결과 저장
 
